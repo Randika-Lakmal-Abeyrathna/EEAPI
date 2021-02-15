@@ -28,5 +28,10 @@ public class GenderController {
         return new ResponseEntity<>(newGender,HttpStatus.CREATED);
     }
 
+    @GetMapping("/find/{id}")
+    public ResponseEntity<Gender> findGenderById(@PathVariable Integer id){
+        Gender gender = genderService.findGenderById(id);
+        return new ResponseEntity<>(gender,HttpStatus.OK);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.randikalakma.eeapi.service.admin;
 
+import com.randikalakma.eeapi.exception.admin.GenderException;
 import com.randikalakma.eeapi.model.Gender;
 import com.randikalakma.eeapi.repository.GenderRepository;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,11 @@ public class GenderService {
 
     public Gender addGender(Gender gender){
         return genderRepository.save(gender);
+    }
+
+    public Gender findGenderById(Integer id){
+        return genderRepository.getGenderByIdgender(id)
+                .orElseThrow(()-> new GenderException("Gender by Id "+id+" was not found"));
     }
 
 }
