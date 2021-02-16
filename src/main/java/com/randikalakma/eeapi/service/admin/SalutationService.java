@@ -35,7 +35,7 @@ public class SalutationService {
     }
 
     public void deleteSalutationById(Integer id){
-        salutationRepository.deleteCityByIdsalutation(id);
+        salutationRepository.deleteSalutationByIdsalutation(id);
     }
 
 

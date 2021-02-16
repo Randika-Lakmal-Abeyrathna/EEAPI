@@ -11,5 +11,5 @@ public interface SalutationRepository extends JpaRepository<Salutation,Integer> 
 
     Optional<Salutation> getSalutationByIdsalutation(Integer id);
 
-    void deleteCityByIdsalutation(Integer id);
+    void deleteSalutationByIdsalutation(Integer id);
 }
