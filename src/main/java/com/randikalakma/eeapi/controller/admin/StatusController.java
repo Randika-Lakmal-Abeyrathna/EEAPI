@@ -1,8 +1,11 @@
 package com.randikalakma.eeapi.controller.admin;
 
+import com.randikalakma.eeapi.exception.admin.GenderException;
+import com.randikalakma.eeapi.exception.admin.StatusException;
 import com.randikalakma.eeapi.model.Status;
 import com.randikalakma.eeapi.service.admin.StatusService;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +31,12 @@ public class StatusController {
         return new ResponseEntity<>(status,HttpStatus.OK);
     }
 
+    @GetMapping("/find/name/{name}")
+    public ResponseEntity<List<Status>> getStatusByStatus(@PathVariable String name){
+        List<Status> statusList = statusService.findStatusByStatus(name);
+        return new ResponseEntity<>(statusList,HttpStatus.OK);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<Status> addStatus(@RequestBody Status status){
         Status newStatus = statusService.addStatus(status);
@@ -42,7 +51,11 @@ public class StatusController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteStatusById(@PathVariable Integer id){
+        try{
         statusService.deleteStatusById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new StatusException("The Status you trying to delete already in Use");
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
