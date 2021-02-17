@@ -1,8 +1,12 @@
 package com.randikalakma.eeapi.controller.admin;
 
+import com.randikalakma.eeapi.exception.admin.CityException;
 import com.randikalakma.eeapi.model.City;
 import com.randikalakma.eeapi.service.admin.CityService;
 import lombok.AllArgsConstructor;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +35,13 @@ public class CityController {
 
     @GetMapping("/find/name/{name}")
     public  ResponseEntity<List<City>> getCityByName(@PathVariable("name") String name){
-        List<City> cityList = cityService.findCityByName(name);
+        List<City> cityList = cityService.findCityByCityName(name);
+        return new ResponseEntity<>(cityList,HttpStatus.OK);
+    }
+
+    @GetMapping("/find/like/{name}")
+    public  ResponseEntity<List<City>> getCityByNameLike(@PathVariable("name") String name){
+        List<City> cityList = cityService.findCityByNameLike(name);
         return new ResponseEntity<>(cityList,HttpStatus.OK);
     }
 
@@ -49,7 +59,11 @@ public class CityController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteCity(@PathVariable Integer id){
+        try{
         cityService.deleteCity(id);
+        }catch(DataIntegrityViolationException e){
+            throw new CityException("The City you trying to delete already in Use");
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

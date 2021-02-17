@@ -16,5 +16,7 @@ public interface CityRepository extends JpaRepository<City,Integer> {
 
     List<City> findByCityIgnoreCaseStartsWith(String city);
 
+    List<City> findCityByCity(String city);
+
     void deleteCityByIdcity(Integer id);
 }
