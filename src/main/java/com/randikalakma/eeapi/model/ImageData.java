@@ -1,5 +1,6 @@
 package com.randikalakma.eeapi.model;
 
+import jdk.jfr.Enabled;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,14 +14,16 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-@Builder
-@Entity
+@Entity(name = "image_data")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Salutation{
+@Builder
+public class ImageData{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idsalutation;
-    private String salutation;
+    @Column(name = "idimage_data")
+    private int idImageData;
+    private String path;
+
 }

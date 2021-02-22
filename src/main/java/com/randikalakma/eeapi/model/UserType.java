@@ -6,18 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+@Entity
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "system_date")
-public class SystemDate {
+@NoArgsConstructor
+public class UserType{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idsystem_date")
-    private int idsystemDate;
-    private Date sysDate;
+    @Column(name = "iduser_type")
+    private int iduserType;
+    private String userType;
 }
