@@ -6,6 +6,7 @@ import com.randikalakma.eeapi.model.ImageData;
 import com.randikalakma.eeapi.repository.CustomerRepository;
 import com.randikalakma.eeapi.service.admin.ImageDataService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +29,11 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final ImageDataService imageDataService;
+    private final PasswordEncoder passwordEncoder;
 
     public Customer addCustomer(Customer customer){
         customerValidation(customer);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         return customerRepository.save(customer);
     }
 
@@ -84,6 +87,7 @@ public class CustomerService {
 
     public Customer updateCustomer(Customer customer){
         customerValidation(customer);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         return customerRepository.save(customer);
     }
 
@@ -92,6 +96,7 @@ public class CustomerService {
         String customerEmail = customer.getEmail();
         Date customerBirthDay = customer.getDateOfBirth();
         String customerFirstName =customer.getFirstName();
+        String password = customer.getPassword();
 
         if (customerEmail.isEmpty() || customerEmail.isBlank())
             throw new CustomerException("Email id cannot be empty or blank");
@@ -103,6 +108,9 @@ public class CustomerService {
         }
         if (customerFirstName.isBlank() || customerFirstName.isEmpty()){
             throw new CustomerException("Customer First Name cannot be empty or blank");
+        }
+        if (password.isEmpty() || password.isBlank()){
+            throw new CustomerException("Password cannot be empty or blank");
         }
 
     }

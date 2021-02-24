@@ -6,6 +6,7 @@ import com.randikalakma.eeapi.model.Supplier;
 import com.randikalakma.eeapi.repository.SupplierRepository;
 import com.randikalakma.eeapi.service.admin.ImageDataService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,9 +26,11 @@ public class SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final ImageDataService imageDataService;
+    private final PasswordEncoder passwordEncoder;
 
     public Supplier addSupplier(Supplier supplier){
         supplierValidation(supplier);
+        supplier.setPassword(passwordEncoder.encode(supplier.getPassword()));
         return supplierRepository.save(supplier);
     }
 
@@ -42,6 +45,7 @@ public class SupplierService {
 
     public Supplier updateSupplier(Supplier supplier){
         supplierValidation(supplier);
+        supplier.setPassword(passwordEncoder.encode(supplier.getPassword()));
         return supplierRepository.save(supplier);
     }
 
@@ -88,6 +92,7 @@ public class SupplierService {
         String supplierName = supplier.getSupplierName();
         String supplierCompanyName = supplier.getCompanyName();
         String supplierCompanyRegNumber = supplier.getCompanyRegNumber();
+        String password = supplier.getPassword();
 
         if (supplierEmail.isEmpty() || supplierEmail.isBlank())
             throw new SupplierException("Email id cannot be empty or blank");
@@ -102,6 +107,9 @@ public class SupplierService {
         }
         if (supplierCompanyRegNumber.isBlank() || supplierCompanyRegNumber.isEmpty()){
             throw new SupplierException("Supplier Company Registration Number cannot be empty or blank");
+        }
+        if (password.isBlank() || password.isEmpty()){
+            throw new SupplierException("Password cannot be empty or blank");
         }
 
     }
