@@ -20,9 +20,9 @@ public class SupplierController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<Supplier> addSupplier(@RequestBody Supplier supplier){
-        Supplier newSupplier = supplierService.addSupplier(supplier);
-        return new ResponseEntity<>(newSupplier, HttpStatus.CREATED);
+    public ResponseEntity<?> addSupplier(@RequestBody Supplier supplier){
+        supplierService.addSupplier(supplier);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
@@ -48,6 +48,12 @@ public class SupplierController {
         Supplier updateSupplier = supplierService.updateSupplierImage(email,imageFile);
 
         return new ResponseEntity<>(updateSupplier, HttpStatus.OK);
+    }
+
+    @GetMapping("/accountverification/{token}")
+    public ResponseEntity<?> enableSupplier(@PathVariable("token") String token){
+        supplierService.activateSupplier(token);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

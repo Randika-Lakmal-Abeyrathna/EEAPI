@@ -32,9 +32,9 @@ public class CustomerController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Customer> addCustomer(@RequestBody Customer customer) {
-        Customer newCustomer = customerService.addCustomer(customer);
-        return new ResponseEntity<>(newCustomer, HttpStatus.CREATED);
+    public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
+        customerService.addCustomer(customer);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
@@ -49,6 +49,12 @@ public class CustomerController {
         Customer updatedCustomer = customerService.updateCustomerImage(email, imageFile);
 
         return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+    }
+
+    @GetMapping("/accountverification/{token}")
+    public ResponseEntity<?> enableCustomer(@PathVariable("token") String token){
+        customerService.activateCustomer(token);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
