@@ -32,9 +32,9 @@ public class CustomerController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Customer> addCustomer(@RequestBody Customer customer) {
-        Customer newCustomer = customerService.addCustomer(customer);
-        return new ResponseEntity<>(newCustomer, HttpStatus.CREATED);
+    public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
+        customerService.addCustomer(customer);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/update")

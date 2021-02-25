@@ -30,6 +30,7 @@ public class Customer{
     private Integer contactNumber1;
     private Integer contactNumber2;
     private String password;
+    private boolean enabled;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_idcity",referencedColumnName = "idcity")
     private City city;

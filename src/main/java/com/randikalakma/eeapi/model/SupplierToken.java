@@ -13,7 +13,7 @@ import java.time.Instant;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerToken {
+public class SupplierToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +21,5 @@ public class CustomerToken {
     private Instant expiry_date;
     private String token;
     @OneToOne(fetch = FetchType.LAZY)
-    private Customer customer;
+    private Supplier supplier;
 }

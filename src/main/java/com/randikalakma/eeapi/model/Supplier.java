@@ -25,6 +25,7 @@ public class Supplier {
     private String companyName;
     private String companyRegNumber;
     private String password;
+    private boolean enabled;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_idcity",referencedColumnName = "idcity")
     private City city;

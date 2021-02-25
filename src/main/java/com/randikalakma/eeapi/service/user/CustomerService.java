@@ -2,9 +2,13 @@ package com.randikalakma.eeapi.service.user;
 
 import com.randikalakma.eeapi.exception.user.CustomerException;
 import com.randikalakma.eeapi.model.Customer;
+import com.randikalakma.eeapi.model.CustomerToken;
 import com.randikalakma.eeapi.model.ImageData;
+import com.randikalakma.eeapi.model.NotificationEmail;
 import com.randikalakma.eeapi.repository.CustomerRepository;
+import com.randikalakma.eeapi.repository.CustomerTokenRepository;
 import com.randikalakma.eeapi.service.admin.ImageDataService;
+import com.randikalakma.eeapi.service.admin.MailService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -30,11 +35,19 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final ImageDataService imageDataService;
     private final PasswordEncoder passwordEncoder;
+    private final CustomerTokenRepository customerTokenRepository;
+    private final MailService mailService;
 
-    public Customer addCustomer(Customer customer){
+    public void addCustomer(Customer customer){
         customerValidation(customer);
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        return customerRepository.save(customer);
+        customer.setEnabled(false);
+        customerRepository.save(customer);
+        String customerToken = generateCustomerVerificationToken(customer);
+        mailService.sendMail(new NotificationEmail("Please Activate your account",customer.getEmail(),
+                "Thank you for signing up ! Please click on the below url to activate your account : "+
+                "http://localhost:8080/api/user/customer/accountverification/"+customerToken));
+
     }
 
     public List<Customer> getAllCustomers(){
@@ -114,4 +127,18 @@ public class CustomerService {
         }
 
     }
+
+
+    private String generateCustomerVerificationToken(Customer customer){
+
+        String customerVerificationToken = UUID.randomUUID().toString();
+
+        CustomerToken customerToken = new CustomerToken();
+        customerToken.setToken(customerVerificationToken);
+        customerToken.setCustomer(customer);
+
+        customerTokenRepository.save(customerToken);
+        return customerVerificationToken;
+    }
+
 }

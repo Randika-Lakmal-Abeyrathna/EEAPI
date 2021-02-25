@@ -20,9 +20,9 @@ public class SupplierController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<Supplier> addSupplier(@RequestBody Supplier supplier){
-        Supplier newSupplier = supplierService.addSupplier(supplier);
-        return new ResponseEntity<>(newSupplier, HttpStatus.CREATED);
+    public ResponseEntity<?> addSupplier(@RequestBody Supplier supplier){
+        supplierService.addSupplier(supplier);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
