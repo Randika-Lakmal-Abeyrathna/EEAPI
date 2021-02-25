@@ -50,4 +50,10 @@ public class SupplierController {
         return new ResponseEntity<>(updateSupplier, HttpStatus.OK);
     }
 
+    @GetMapping("/accountverification/{token}")
+    public ResponseEntity<?> enableSupplier(@PathVariable("token") String token){
+        supplierService.activateSupplier(token);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

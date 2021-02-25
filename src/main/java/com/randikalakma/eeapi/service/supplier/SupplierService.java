@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,10 +24,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class SupplierService {
 
     private final SupplierRepository supplierRepository;
@@ -139,6 +142,22 @@ public class SupplierService {
         supplierTokenRepository.save(supplierToken);
 
         return supplierVerificationToken;
+    }
+
+    public void activateSupplier(String token){
+        Optional<SupplierToken> supplierToken = supplierTokenRepository.findByToken(token);
+        supplierToken.orElseThrow(()->new SupplierException("Invalid Token"));
+
+        String supplierEmail = supplierToken.get().getSupplier().getEmail();
+        Supplier supplier = supplierRepository.findById(supplierEmail).orElseThrow(()->new SupplierException("Supplier Not found with email "+supplierEmail));
+        supplier.setEnabled(true);
+        supplierRepository.save(supplier);
+        deleteSupplierToken(token,supplier);
+
+    }
+
+    private void deleteSupplierToken(String token,Supplier supplier){
+        supplierTokenRepository.deleteSupplierTokenByTokenAndSupplier(token,supplier);
     }
 
 }
