@@ -51,6 +51,12 @@ public class CustomerController {
         return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
     }
 
+    @GetMapping("/accountverification/{token}")
+    public ResponseEntity<?> enableCustomer(@PathVariable("token") String token){
+        customerService.activateCustomer(token);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 
 

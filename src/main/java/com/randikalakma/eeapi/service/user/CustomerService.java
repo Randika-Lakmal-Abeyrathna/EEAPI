@@ -22,10 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -128,6 +125,16 @@ public class CustomerService {
 
     }
 
+    public void activateCustomer(String token){
+        Optional<CustomerToken> customerToken = customerTokenRepository.findByToken(token);
+        customerToken.orElseThrow(()-> new CustomerException("Invalid Token"));
+
+        String customerEmail = customerToken.get().getCustomer().getEmail();
+        Customer customer = customerRepository.findById(customerEmail).orElseThrow(()->new CustomerException("Customer Not found with email : "+customerEmail));
+        customer.setEnabled(true);
+        customerRepository.save(customer);
+        deleteCustomerToken(token,customer);
+    }
 
     private String generateCustomerVerificationToken(Customer customer){
 
@@ -139,6 +146,10 @@ public class CustomerService {
 
         customerTokenRepository.save(customerToken);
         return customerVerificationToken;
+    }
+
+    private void deleteCustomerToken(String token,Customer customer){
+        customerTokenRepository.deleteCustomerTokenByTokenAndCustomer(token,customer);
     }
 
 }
