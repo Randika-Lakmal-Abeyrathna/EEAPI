@@ -17,7 +17,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Gender{
+public class Gender implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

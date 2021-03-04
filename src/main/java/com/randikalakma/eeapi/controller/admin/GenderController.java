@@ -43,8 +43,8 @@ public class GenderController {
     }
 
     @GetMapping("/find/name/{name]")
-    public ResponseEntity<List<Gender>> findGenderByGender(@PathVariable String gender){
-        List<Gender> genderList = genderService.findGenderByGender(gender);
+    public ResponseEntity<Gender> findGenderByGender(@PathVariable String gender){
+        Gender genderList = genderService.findGenderByGender(gender);
         return new ResponseEntity<>(genderList,HttpStatus.OK);
     }
 

@@ -1,7 +1,8 @@
 package com.randikalakma.eeapi.controller.supplier;
 
-import com.randikalakma.eeapi.model.Customer;
-import com.randikalakma.eeapi.model.Supplier;
+import com.randikalakma.eeapi.dto.SupplierRequest;
+import com.randikalakma.eeapi.model.SupplierInfo;
+import com.randikalakma.eeapi.service.UserService;
 import com.randikalakma.eeapi.service.supplier.SupplierService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,42 +18,36 @@ import java.util.List;
 public class SupplierController {
 
     private final SupplierService supplierService;
+    private final UserService userService;
 
 
     @PostMapping("/add")
-    public ResponseEntity<?> addSupplier(@RequestBody Supplier supplier){
-        supplierService.addSupplier(supplier);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<SupplierInfo> addSupplier(@RequestBody SupplierRequest supplierRequest){
+        SupplierInfo supplierInfo =supplierService.addSupplier(supplierRequest);
+        return new ResponseEntity<>(supplierInfo,HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Supplier> updateSupplier(@RequestBody Supplier supplier){
-        Supplier updatedSupplier =supplierService.updateSupplier(supplier);
-        return new ResponseEntity<>(updatedSupplier,HttpStatus.OK);
+    public ResponseEntity<SupplierInfo> updateSupplier(@RequestBody SupplierRequest supplier){
+        SupplierInfo supplierInfo =supplierService.updateSupplier(supplier);
+        return new ResponseEntity<>(supplierInfo,HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Supplier>> getAllSuppliers(){
-        List<Supplier> supplierList = supplierService.getAllSupplier();
+    public ResponseEntity<List<SupplierInfo>> getAllSuppliers(){
+        List<SupplierInfo> supplierList = supplierService.getAllSupplier();
         return new ResponseEntity<>(supplierList,HttpStatus.OK);
     }
 
     @PostMapping("/find/email")
-    public ResponseEntity<Supplier> getSupplierByEmail(@RequestParam("email") String email){
-        Supplier supplier = supplierService.getSupplierByEmail(email);
+    public ResponseEntity<SupplierInfo> getSupplierByEmail(@RequestParam("email") String email){
+        SupplierInfo supplier = supplierService.getSupplierByEmailAndUserType(email);
         return new ResponseEntity<>(supplier,HttpStatus.OK);
     }
 
     @PutMapping("/update/image")
-    public ResponseEntity<Supplier> addSupplierImage(@RequestParam("email") String email, @RequestParam("image") MultipartFile imageFile) {
-        Supplier updateSupplier = supplierService.updateSupplierImage(email,imageFile);
-
-        return new ResponseEntity<>(updateSupplier, HttpStatus.OK);
-    }
-
-    @GetMapping("/accountverification/{token}")
-    public ResponseEntity<?> enableSupplier(@PathVariable("token") String token){
-        supplierService.activateSupplier(token);
+    public ResponseEntity<?> addSupplierImage(@RequestParam("email") String email, @RequestParam("image") MultipartFile imageFile) {
+        userService.updateUserImage(email, imageFile);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

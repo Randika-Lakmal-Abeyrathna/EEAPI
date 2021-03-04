@@ -16,6 +16,8 @@ public interface StatusRepository extends JpaRepository<Status,Integer> {
 
     void deleteSalutationByIdstatus(Integer id);
 
-    List<Status> findStatusByStatus(String status);
+    Integer countByStatus(String status);
+
+    Optional<Status> findStatusByStatus(String status);
 
 }

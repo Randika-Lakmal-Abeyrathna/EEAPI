@@ -32,8 +32,8 @@ public class StatusController {
     }
 
     @GetMapping("/find/name/{name}")
-    public ResponseEntity<List<Status>> getStatusByStatus(@PathVariable String name){
-        List<Status> statusList = statusService.findStatusByStatus(name);
+    public ResponseEntity<Status> getStatusByStatus(@PathVariable String name){
+        Status statusList = statusService.findStatusByStatus(name);
         return new ResponseEntity<>(statusList,HttpStatus.OK);
     }
 

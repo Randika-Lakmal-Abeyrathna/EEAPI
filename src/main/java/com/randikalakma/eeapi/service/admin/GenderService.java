@@ -39,8 +39,13 @@ public class GenderService {
         return genderRepository.save(newGender);
     }
 
-    public List<Gender> findGenderByGender(String gender){
-        return genderRepository.findGenderByGender(gender);
+    public Integer getCountByGender(String gender){
+        return genderRepository.countByGender(gender);
+    }
+
+    public Gender findGenderByGender(String gender){
+        return genderRepository.findGenderByGender(gender)
+                .orElseThrow(()-> new GenderException("Gender by name "+gender+" was not found"));
     }
 
     public void deleteGenderById(Integer id){
@@ -50,7 +55,7 @@ public class GenderService {
     private void genderValidation(Gender gender){
         String genderName = gender.getGender().toLowerCase();
 
-        if(findGenderByGender(genderName).size()>0){
+        if(getCountByGender(genderName)>0){
              throw new GenderException("Gender "+genderName+" already in use");
         }else if(genderName.isBlank() || genderName.isEmpty()){
             throw new GenderException("Gender name can not be empty or blank");

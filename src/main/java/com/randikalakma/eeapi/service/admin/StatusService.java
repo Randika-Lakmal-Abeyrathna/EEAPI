@@ -43,13 +43,18 @@ public class StatusService {
         statusRepository.deleteSalutationByIdstatus(id);
     }
 
-    public List<Status> findStatusByStatus(String status) {
-        return statusRepository.findStatusByStatus(status);
+    public Integer getCountByStatus(String status){
+        return statusRepository.countByStatus(status);
+    }
+
+    public Status findStatusByStatus(String status) {
+        return statusRepository.findStatusByStatus(status)
+                .orElseThrow(() -> new StatusException("Status by id " + status + " was not found"));
     }
 
     private void statusValidation(Status status){
         String statusName = status.getStatus().toLowerCase();
-        if (findStatusByStatus(statusName).size()>0){
+        if (getCountByStatus(statusName)>0){
             throw new StatusException("Status "+statusName+" is already in use");
         }else if(statusName.isBlank()|| statusName.isEmpty()){
             throw new StatusException("Status Can not be empty or blank");

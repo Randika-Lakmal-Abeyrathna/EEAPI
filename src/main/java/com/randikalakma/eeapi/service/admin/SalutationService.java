@@ -42,14 +42,19 @@ public class SalutationService {
         salutationRepository.deleteSalutationByIdsalutation(id);
     }
 
-    public List<Salutation> findSalutationBySalutation(String salutation){
-        return salutationRepository.findSalutationBySalutation(salutation);
+    public Integer getCountBySalutation(String salutation){
+        return salutationRepository.countBySalutation(salutation);
+    }
+
+    public Salutation findSalutationBySalutation(String salutation){
+        return salutationRepository.findSalutationBySalutation(salutation)
+                .orElseThrow(()-> new SalutationException("Salutation by name "+salutation+" was not found"));
     }
 
     private void salutationValidation(Salutation salutation){
         String salutationName = salutation.getSalutation().toLowerCase();
 
-        if (findSalutationBySalutation(salutationName).size()>0){
+        if (getCountBySalutation(salutationName)>0){
             throw new SalutationException("Salutation "+salutationName+" is already in use");
         }else if(salutationName.isEmpty()|| salutationName.isBlank()){
             throw new SalutationException("Salutation cannot be empty or blank");

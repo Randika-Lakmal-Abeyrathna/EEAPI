@@ -1,7 +1,8 @@
 package com.randikalakma.eeapi.controller.user;
 
-import com.randikalakma.eeapi.model.Customer;
-import com.randikalakma.eeapi.repository.ImageDataRepository;
+import com.randikalakma.eeapi.dto.CustomerRequest;
+import com.randikalakma.eeapi.model.CustomerInfo;
+import com.randikalakma.eeapi.service.UserService;
 import com.randikalakma.eeapi.service.user.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,47 +18,38 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final UserService userService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> customerList = customerService.getAllCustomers();
+    public ResponseEntity<List<CustomerInfo>> getAllCustomers() {
+        List<CustomerInfo> customerList = customerService.getAllCustomers();
         return new ResponseEntity<>(customerList, HttpStatus.OK);
 
     }
 
     @PostMapping("/find/email")
-    public ResponseEntity<Customer> getCustomerByEmail(@RequestParam("email") String email) {
-        Customer customer = customerService.getCustomerByEmail(email);
+    public ResponseEntity<CustomerInfo> getCustomerByEmail(@RequestParam("email") String email) {
+        CustomerInfo customer = customerService.getCustomerByEmailAndUserType(email);
         return new ResponseEntity<>(customer, HttpStatus.OK);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
-        customerService.addCustomer(customer);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<CustomerInfo> addCustomer(@RequestBody CustomerRequest customer) {
+        CustomerInfo customerInfo = customerService.addCustomer(customer);
+        return new ResponseEntity<>(customerInfo, HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Customer> updateCustomer(@RequestBody Customer customer) {
-        Customer updatedCustomer = customerService.updateCustomer(customer);
-        return new ResponseEntity<>(updatedCustomer,HttpStatus.OK);
+    public ResponseEntity<CustomerInfo> updateCustomer(@RequestBody CustomerRequest customer) {
+        CustomerInfo customerInfo =customerService.updateCustomer(customer);
+        return new ResponseEntity<>(customerInfo,HttpStatus.OK);
     }
 
     @PutMapping("/update/image")
-    public ResponseEntity<Customer> addCustomerImage(@RequestParam("email") String email, @RequestParam("image") MultipartFile imageFile) {
-
-        Customer updatedCustomer = customerService.updateCustomerImage(email, imageFile);
-
-        return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
-    }
-
-    @GetMapping("/accountverification/{token}")
-    public ResponseEntity<?> enableCustomer(@PathVariable("token") String token){
-        customerService.activateCustomer(token);
+    public ResponseEntity<?> addCustomerImage(@RequestParam("email") String email, @RequestParam("image") MultipartFile imageFile) {
+        userService.updateUserImage(email, imageFile);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-
 
 
 }

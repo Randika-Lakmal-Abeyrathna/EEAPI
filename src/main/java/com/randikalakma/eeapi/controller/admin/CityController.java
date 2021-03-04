@@ -4,6 +4,7 @@ import com.randikalakma.eeapi.exception.admin.CityException;
 import com.randikalakma.eeapi.model.City;
 import com.randikalakma.eeapi.service.admin.CityService;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,8 +35,8 @@ public class CityController {
     }
 
     @GetMapping("/find/name/{name}")
-    public  ResponseEntity<List<City>> getCityByName(@PathVariable("name") String name){
-        List<City> cityList = cityService.findCityByCityName(name);
+    public  ResponseEntity<City> getCityByName(@PathVariable("name") String name){
+       City cityList = cityService.findCityByCityName(name);
         return new ResponseEntity<>(cityList,HttpStatus.OK);
     }
 

@@ -14,7 +14,9 @@ public interface GenderRepository extends JpaRepository<Gender,Integer> {
 
     Optional<Gender> getGenderByIdgender(Integer id);
 
-    List<Gender> findGenderByGender(String gender);
+    Optional<Gender> findGenderByGender(String gender);
+
+    Integer countByGender(String gender);
 
     void deleteGenderByIdgender(Integer id);
 
