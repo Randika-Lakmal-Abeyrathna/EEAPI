@@ -4,6 +4,7 @@ import com.randikalakma.eeapi.exception.admin.CityException;
 import com.randikalakma.eeapi.model.City;
 import com.randikalakma.eeapi.repository.CityRepository;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -45,14 +46,19 @@ public class CityService {
        cityRepository.deleteCityByIdcity(id);
     }
 
+    public int getCountByCity(String city){
+        return cityRepository.countByCity(city);
+    }
 
-    public List<City> findCityByCityName(String city){
-        return cityRepository.findCityByCity(city);
+    public City findCityByCityName(String city){
+        return cityRepository.findCityByCity(city)
+                .orElseThrow(()->new CityException("City by name "+city+" was not found"));
+
     }
 
     private void cityValidation(City city){
         String cityName = city.getCity().toLowerCase();
-        if (findCityByCityName(cityName).size()>0){
+        if (getCountByCity(cityName)>0){
             throw new CityException("City Name "+cityName+" already exits ! ");
         }else if (cityName.isEmpty() || cityName.isBlank()){
             throw new CityException("City Name can not be blank or Empty !");

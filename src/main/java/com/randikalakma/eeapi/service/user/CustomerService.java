@@ -1,27 +1,16 @@
 package com.randikalakma.eeapi.service.user;
 
+import com.randikalakma.eeapi.dto.CustomerRequest;
 import com.randikalakma.eeapi.exception.user.CustomerException;
-import com.randikalakma.eeapi.model.Customer;
-import com.randikalakma.eeapi.model.CustomerToken;
-import com.randikalakma.eeapi.model.ImageData;
-import com.randikalakma.eeapi.model.NotificationEmail;
-import com.randikalakma.eeapi.repository.CustomerRepository;
-import com.randikalakma.eeapi.repository.CustomerTokenRepository;
-import com.randikalakma.eeapi.service.admin.ImageDataService;
-import com.randikalakma.eeapi.service.admin.MailService;
+import com.randikalakma.eeapi.model.*;
+import com.randikalakma.eeapi.repository.*;
+import com.randikalakma.eeapi.service.UserService;
+import com.randikalakma.eeapi.service.admin.*;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Service
@@ -29,127 +18,151 @@ import java.util.*;
 @AllArgsConstructor
 public class CustomerService {
 
-    private final CustomerRepository customerRepository;
-    private final ImageDataService imageDataService;
+
     private final PasswordEncoder passwordEncoder;
-    private final CustomerTokenRepository customerTokenRepository;
-    private final MailService mailService;
+    private final CityService cityService;
+    private final StatusService statusService;
+    private final UserTypeService userTypeService;
+    private final GenderService genderService;
+    private final SalutationService salutationService;
+    private final CustomerInfoRepository customerInfoRepository;
+    private final UserService userService;
 
-    public void addCustomer(Customer customer){
-        customerValidation(customer);
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        customer.setEnabled(false);
-        customerRepository.save(customer);
-        String customerToken = generateCustomerVerificationToken(customer);
-        mailService.sendMail(new NotificationEmail("Please Activate your account",customer.getEmail(),
-                "Thank you for signing up ! Please click on the below url to activate your account : "+
-                "http://localhost:8080/api/user/customer/accountverification/"+customerToken));
+    public CustomerInfo addCustomer(CustomerRequest customerRequest) {
+        customerValidation(customerRequest);
+        customerRequest.setPassword(passwordEncoder.encode(customerRequest.getPassword()));
+        City city = cityService.findCityByCityName(customerRequest.getCity().toLowerCase());
+        Status status = statusService.findStatusByStatus(customerRequest.getStatus().toLowerCase());
+        UserType userType = userTypeService.getUserTypeByUserType(customerRequest.getUserType().toLowerCase());
+        Gender gender = genderService.findGenderByGender(customerRequest.getGender().toLowerCase());
+        Salutation salutation = salutationService.findSalutationBySalutation(customerRequest.getSalutation().toLowerCase());
 
+        // Save User details
+        User user = new User();
+        user.setEmail(customerRequest.getEmail());
+        user.setAddressNo(customerRequest.getAddressNo());
+        user.setAddress_street(customerRequest.getAddressStreet1());
+        user.setAddress_street2(customerRequest.getAddressStreet2());
+        user.setContactNumber1(customerRequest.getContactNumber1());
+        user.setContactNumber2(customerRequest.getContactNumber2());
+        user.setPassword(customerRequest.getPassword());
+        user.setEnabled(false);
+        user.setCity(city);
+        user.setStatus(status);
+        user.setUserType(userType);
+
+        User addedUser = userService.addUser(user);
+
+        //Save Customer Info
+        CustomerInfo customerInfo = new CustomerInfo();
+        customerInfo.setFirstName(customerRequest.getFirstName());
+        customerInfo.setMiddleName(customerRequest.getMiddleName());
+        customerInfo.setLastName(customerRequest.getLastName());
+        customerInfo.setDateOfBirth(customerRequest.getDateOfBirth());
+        customerInfo.setUser(addedUser);
+        customerInfo.setGender(gender);
+        customerInfo.setSalutation(salutation);
+
+        CustomerInfo savedCustomerInfo =customerInfoRepository.save(customerInfo);
+        userService.sendUserActivationEmail(addedUser);
+        return savedCustomerInfo;
     }
 
-    public List<Customer> getAllCustomers(){
-        return customerRepository.findAll();
+    public List<CustomerInfo> getAllCustomers() {
+        return customerInfoRepository.findAll();
     }
 
-    public Customer getCustomerByEmail(String email){
-        return customerRepository.findById(email)
-                .orElseThrow(()-> new CustomerException("Email +"+email+" was Not Found"));
+    public CustomerInfo getCustomerByEmailAndUserType(String email) {
+
+        UserType userType = userTypeService.getUserTypeByUserType("user");
+        User user = userService.findUserByEmailAndUserType(email, userType);
+        return customerInfoRepository.findByUser(user)
+                .orElseThrow(() -> new CustomerException("Customer Info Not found"));
     }
 
-    public Customer updateCustomerImage(String email,MultipartFile imageFile){
+    public CustomerInfo updateCustomer(CustomerRequest customerRequest) {
+        customerUpdateValidation(customerRequest);
+        customerRequest.setPassword(passwordEncoder.encode(customerRequest.getPassword()));
+        City city = cityService.findCityByCityName(customerRequest.getCity().toLowerCase());
+        Status status = statusService.findStatusByStatus(customerRequest.getStatus().toLowerCase());
+        UserType userType = userTypeService.getUserTypeByUserType(customerRequest.getUserType().toLowerCase());
+        Gender gender = genderService.findGenderByGender(customerRequest.getGender().toLowerCase());
+        Salutation salutation = salutationService.findSalutationBySalutation(customerRequest.getSalutation().toLowerCase());
 
-        Customer customer = getCustomerByEmail(email);
+        String userEmail = customerRequest.getEmail();
 
-        /// Upload Image
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(imageFile.getOriginalFilename()));
+        // Update User details
+        User user = userService.getUserByEmail(userEmail);
+        CustomerInfo customerInfo = customerInfoRepository.findByUser(user)
+                .orElseThrow(() -> new CustomerException("Customer Info Not found"));
 
-        String uploadDir= "./customer-images/";
+        user.setAddressNo(customerRequest.getAddressNo());
+        user.setAddress_street(customerRequest.getAddressStreet1());
+        user.setAddress_street2(customerRequest.getAddressStreet2());
+        user.setContactNumber1(customerRequest.getContactNumber1());
+        user.setContactNumber2(customerRequest.getContactNumber2());
+        user.setPassword(customerRequest.getPassword());
+        user.setCity(city);
+        user.setStatus(status);
+        user.setUserType(userType);
 
-        Path uploadPath = Paths.get(uploadDir);
+        User addedUser = userService.updateUser(user);
 
-        try {
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-        }catch (IOException e){
-            System.out.println("Cannot Create folder");
-            e.printStackTrace();
-        }
-        Path filePath = uploadPath.resolve(fileName);
-        System.out.println("FILE PATH :"+filePath.toString());
-        try {
-            InputStream inputStream = imageFile.getInputStream();
+        //update Customer Info
+        customerInfo.setFirstName(customerRequest.getFirstName());
+        customerInfo.setMiddleName(customerRequest.getMiddleName());
+        customerInfo.setLastName(customerRequest.getLastName());
+        customerInfo.setDateOfBirth(customerRequest.getDateOfBirth());
+        customerInfo.setUser(addedUser);
+        customerInfo.setGender(gender);
+        customerInfo.setSalutation(salutation);
 
-            Files.copy(inputStream,filePath, StandardCopyOption.REPLACE_EXISTING);
-        }catch (IOException e){
-            System.out.println("Cannot upload image");
-        }
-
-        ImageData imageData = new ImageData();
-        imageData.setPath(filePath.toString());
-
-        ImageData updatedImageData = imageDataService.addImageData(imageData);
-
-        customer.setImageData(updatedImageData);
-
-        return customerRepository.save(customer);
+        return customerInfoRepository.save(customerInfo);
     }
 
-    public Customer updateCustomer(Customer customer){
-        customerValidation(customer);
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        return customerRepository.save(customer);
-    }
+    private void customerUpdateValidation(CustomerRequest customerRequest){
 
-    private void customerValidation(Customer customer){
-
-        String customerEmail = customer.getEmail();
-        Date customerBirthDay = customer.getDateOfBirth();
-        String customerFirstName =customer.getFirstName();
-        String password = customer.getPassword();
+        String customerEmail = customerRequest.getEmail();
+        Date customerBirthDay = customerRequest.getDateOfBirth();
+        String customerFirstName = customerRequest.getFirstName();
+        String password = customerRequest.getPassword();
 
         if (customerEmail.isEmpty() || customerEmail.isBlank())
             throw new CustomerException("Email id cannot be empty or blank");
-        if (customerRepository.existsById(customerEmail)){
-            throw new CustomerException("Email id " +customer.getEmail()+" already is use.");
-        }
-        if (customerBirthDay.after(new Date())){
+        if (customerBirthDay.after(new Date())) {
             throw new CustomerException("Invalid Date of birth");
         }
-        if (customerFirstName.isBlank() || customerFirstName.isEmpty()){
+        if (customerFirstName.isBlank() || customerFirstName.isEmpty()) {
             throw new CustomerException("Customer First Name cannot be empty or blank");
         }
-        if (password.isEmpty() || password.isBlank()){
+        if (password.isEmpty() || password.isBlank()) {
             throw new CustomerException("Password cannot be empty or blank");
         }
 
     }
 
-    public void activateCustomer(String token){
-        Optional<CustomerToken> customerToken = customerTokenRepository.findByToken(token);
-        customerToken.orElseThrow(()-> new CustomerException("Invalid Token"));
+    private void customerValidation(CustomerRequest customerRequest) {
 
-        String customerEmail = customerToken.get().getCustomer().getEmail();
-        Customer customer = customerRepository.findById(customerEmail).orElseThrow(()->new CustomerException("Customer Not found with email : "+customerEmail));
-        customer.setEnabled(true);
-        customerRepository.save(customer);
-        deleteCustomerToken(token,customer);
-    }
+        String customerEmail = customerRequest.getEmail();
+        Date customerBirthDay = customerRequest.getDateOfBirth();
+        String customerFirstName = customerRequest.getFirstName();
+        String password = customerRequest.getPassword();
 
-    private String generateCustomerVerificationToken(Customer customer){
+        if (customerEmail.isEmpty() || customerEmail.isBlank())
+            throw new CustomerException("Email id cannot be empty or blank");
+        if (userService.checkUserExistByEmail(customerEmail)) {
+            throw new CustomerException("Email id " + customerRequest.getEmail() + " already is use.");
+        }
+        if (customerBirthDay.after(new Date())) {
+            throw new CustomerException("Invalid Date of birth");
+        }
+        if (customerFirstName.isBlank() || customerFirstName.isEmpty()) {
+            throw new CustomerException("Customer First Name cannot be empty or blank");
+        }
+        if (password.isEmpty() || password.isBlank()) {
+            throw new CustomerException("Password cannot be empty or blank");
+        }
 
-        String customerVerificationToken = UUID.randomUUID().toString();
-
-        CustomerToken customerToken = new CustomerToken();
-        customerToken.setToken(customerVerificationToken);
-        customerToken.setCustomer(customer);
-
-        customerTokenRepository.save(customerToken);
-        return customerVerificationToken;
-    }
-
-    private void deleteCustomerToken(String token,Customer customer){
-        customerTokenRepository.deleteCustomerTokenByTokenAndCustomer(token,customer);
     }
 
 }

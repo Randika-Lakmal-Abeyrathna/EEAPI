@@ -14,5 +14,7 @@ public interface SalutationRepository extends JpaRepository<Salutation,Integer> 
 
     void deleteSalutationByIdsalutation(Integer id);
 
-    List<Salutation> findSalutationBySalutation(String salutation);
+    Integer countBySalutation(String salutation);
+
+    Optional<Salutation> findSalutationBySalutation(String salutation);
 }

@@ -33,8 +33,8 @@ public class SalutationController {
     }
 
     @GetMapping("/find/name/{name}")
-    public ResponseEntity<List<Salutation>> getSalutationBySalutation(@PathVariable String name){
-        List<Salutation> salutationList = salutationService.findSalutationBySalutation(name);
+    public ResponseEntity<Salutation> getSalutationBySalutation(@PathVariable String name){
+        Salutation salutationList = salutationService.findSalutationBySalutation(name);
         return new ResponseEntity<>(salutationList,HttpStatus.OK);
     }
 

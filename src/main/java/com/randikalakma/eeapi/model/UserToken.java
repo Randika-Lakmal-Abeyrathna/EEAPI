@@ -8,18 +8,19 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.Instant;
 
-@Data
 @Entity
-@Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerToken {
+@Builder
+public class UserToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private Instant expiry_date;
+    private Instant expiryDate;
     private String token;
-    @OneToOne(fetch = FetchType.LAZY)
-    private Customer customer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_email",referencedColumnName = "email")
+    private User user;
 }
