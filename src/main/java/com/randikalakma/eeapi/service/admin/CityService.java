@@ -4,7 +4,6 @@ import com.randikalakma.eeapi.exception.admin.CityException;
 import com.randikalakma.eeapi.model.City;
 import com.randikalakma.eeapi.repository.CityRepository;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

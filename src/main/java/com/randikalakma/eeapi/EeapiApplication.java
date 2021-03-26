@@ -11,5 +11,4 @@ public class EeapiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EeapiApplication.class, args);
 	}
-
 }
