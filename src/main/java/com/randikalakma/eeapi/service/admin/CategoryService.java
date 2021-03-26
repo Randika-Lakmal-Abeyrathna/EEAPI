@@ -32,6 +32,14 @@ public class CategoryService {
         return categoryRepository.save(newCategory);
     }
 
+    public Category getCategoryByCategory(String categoryName){
+        return categoryRepository.findCategoryByCategory(categoryName)
+                .orElseThrow(()->new CategoryException("Category name :"+categoryName+"was not found"));
+    }
+    
+    public List<Category> getCategoryByCategoryNameLike(String categoryName){
+        return categoryRepository.findByCategoryIgnoreCaseContaining(categoryName);
+    }
 
 
     public void deleteCategoryById(Integer id){

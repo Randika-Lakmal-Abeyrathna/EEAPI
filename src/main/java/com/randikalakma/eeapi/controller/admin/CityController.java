@@ -59,7 +59,7 @@ public class CityController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCity(@PathVariable Integer id){
+    public ResponseEntity<?> deleteCity(@PathVariable("id") Integer id){
         try{
         cityService.deleteCity(id);
         }catch(DataIntegrityViolationException e){
