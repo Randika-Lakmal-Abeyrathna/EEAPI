@@ -25,6 +25,11 @@ public class BrandService {
                 .orElseThrow(()-> new BrandException("Brand Name "+brandName+" not found"));
     }
 
+    public List<Brand> getBrandByBrandNameLike(String brandName){
+       return brandRepository.findByBrandnameIgnoreCaseContaining(brandName);
+
+    }
+
     public Brand addBrand(Brand brand){
         brandValidation(brand);
         Brand newBrand =setToLowerCase(brand);
